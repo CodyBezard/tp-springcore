@@ -18,4 +18,8 @@ public class VilleService {
         ville.add(new Ville("Marseille", 850700));
         ville.add(new Ville("Tarbes", 40600));
     }
+
+    public void addVille(String nom, int nbHabitant){
+        ville.add(new Ville(nom, nbHabitant));
+    }
 }

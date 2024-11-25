@@ -1,11 +1,9 @@
 package fr.diginamic.hello.controleurs;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -18,7 +16,17 @@ public class VilleControleur {
     @GetMapping
     public List<Ville> getVilles() {
         List<Ville> villes = villeService.ville;
-        return villes;        
+        return villes;
     }
 
+    @PostMapping
+    public ResponseEntity<String> addVille(@RequestBody Ville ville) {
+        for(Ville v : villeService.ville) {
+            if(v.getNom().equals(ville.getNom())) {
+                return ResponseEntity.badRequest().body("La ville existe déjà");
+            }
+        }
+        villeService.ville.add(ville);
+        return ResponseEntity.ok("Ville insérée avec succès");
+    }
 }
