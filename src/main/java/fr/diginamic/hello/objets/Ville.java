@@ -1,27 +1,34 @@
-package fr.diginamic.hello.controleurs;
+package fr.diginamic.hello.objets;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.*;
 
-public class Ville {
-    private static Long idCounter = 1L;
-    @Min(1)
-    private Long id;
-    @NotNull
-    @Size(min = 2)
+import java.io.Serializable;
+
+@Entity
+@Table(name="ville")
+public class Ville implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name= "ID")
+    private int id;
+    @Column(name="NOM",nullable = false,unique = true)
     private String nom;
-    @Min(1)
+    @Column(name="NBHABITANTS",nullable = false)
     private int nbHabitants;
 
+    public Ville() {}
+
     public Ville(String nom, int nbHabitants) {
-        this.id = idCounter++;
         this.nom = nom;
         this.nbHabitants = nbHabitants;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getNom() {

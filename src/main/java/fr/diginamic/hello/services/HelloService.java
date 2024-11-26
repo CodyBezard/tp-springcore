@@ -1,4 +1,4 @@
-package fr.diginamic.hello.controleurs;
+package fr.diginamic.hello.services;
 
 import org.springframework.stereotype.Service;
 

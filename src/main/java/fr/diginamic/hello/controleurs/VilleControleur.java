@@ -1,5 +1,7 @@
 package fr.diginamic.hello.controleurs;
 
+import fr.diginamic.hello.objets.Ville;
+import fr.diginamic.hello.services.VilleService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,41 +20,52 @@ public class VilleControleur {
     @Autowired
     private VilleService villeService;
 
+    // Get - liste des villes
     @GetMapping
-    public List<Ville> getVilles() { return villeService.getAllVilles();}
+    public List<Ville> getAllVilles() {
+        return villeService.getAllVilles();
+    }
 
+    //Get - ville par id
     @GetMapping("/{id}")
-    public Ville getVilleId(@PathVariable Long id) { return villeService.findVilleById(id);}
-
-    @PostMapping
-    public ResponseEntity<String> createVille(@RequestBody Ville ville) {
-        boolean idExists= villeService.ville.stream().anyMatch(v -> v.getId()== (ville.getId()));
-        if(idExists) {
-            return new ResponseEntity<>("L'identifiant est déjà utilisé", HttpStatus.CONFLICT);
-        }else {
-            if (villeService.addVille(ville)) {
-                return new ResponseEntity<String>("Ville insérée avec succès !", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<String>("La ville existe déjà !", HttpStatus.BAD_REQUEST);
-            }
-        }
-    }
-
-    @PutMapping
-    public ResponseEntity<String> updateVille(@RequestBody Ville ville) {
-        if (villeService.updateVille(ville)) {
-            return new ResponseEntity<String>("Succès !",HttpStatus.OK);
-        }else {
-            return new ResponseEntity<String>("La mise à jour a échouée !",HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteVille(@PathVariable Long id) {
-        if(villeService.deleteVille(id)){
-            return new ResponseEntity<>("Ville deleted !", HttpStatus.OK);
+    public ResponseEntity<Ville> getVilleById(@PathVariable Integer id) {
+        Ville v = villeService.findVilleById(id);
+        if(v!=null){
+            return ResponseEntity.ok(v);
         }else{
-            return new ResponseEntity<>("La suppression a échouée !",HttpStatus.BAD_REQUEST);
+            return ResponseEntity.notFound().build();
         }
     }
+
+    //Get - ville par nom
+    @GetMapping("/nom/{name}")
+    public ResponseEntity<Ville> getVilleByName(@PathVariable String name) {
+        Ville v = villeService.findVilleByName(name);
+        if(v!=null){
+            return ResponseEntity.ok(v);
+        }else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    //Post - Ajouter une nouvelle ville
+    @PostMapping
+    public List<Ville> addVille(@RequestBody Ville ville) {
+        return villeService.insertVille(ville);
+    }
+
+    //Put - Modifier une ville existante
+    @PutMapping("/{id}")
+    public ResponseEntity<List<Ville>> updateVille(@PathVariable Integer id, @RequestBody Ville ville) {
+        List<Ville> updateVille = villeService.updateVille(id, ville);
+        return ResponseEntity.ok(updateVille);
+    }
+
+    //Delete - Suppression d'une ville par ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<List<Ville>> deleteVilleById(@PathVariable Integer id) {
+        List<Ville> deleteVille = villeService.deleteVille(id);
+        return ResponseEntity.ok(deleteVille);
+    }
+
 }
