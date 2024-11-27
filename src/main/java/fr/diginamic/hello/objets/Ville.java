@@ -11,7 +11,6 @@ public class Ville implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name= "ID")
     private int id;
-    @Column(name="NAME",nullable = false)
     private String name;
     @ManyToOne
     @JoinColumn(name="DEPARTMENT_ID")
@@ -48,6 +47,28 @@ public class Ville implements Serializable {
 
     public void setNbHabitants(int nbHabitants) {
         this.nbHabitants = nbHabitants;
+    }
+
+    public Departement getDepartement() {
+        return departement;
+    }
+
+    public void setDepartement(Departement departement) {
+        this.departement = departement;
+    }
+
+    public String getDepartementCode(){
+        if(departement!=null){
+            return departement.getCode();
+        }
+        return null;
+    }
+
+    public String getDepartementName(){
+        if(departement!=null){
+            return departement.getName();
+        }
+        return null;
     }
 
     @Override
