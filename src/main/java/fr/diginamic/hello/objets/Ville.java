@@ -5,21 +5,24 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name="ville")
+@Table(name="VILLE")
 public class Ville implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name= "ID")
     private int id;
-    @Column(name="NOM",nullable = false,unique = true)
-    private String nom;
-    @Column(name="NBHABITANTS",nullable = false)
+    @Column(name="NAME",nullable = false)
+    private String name;
+    @ManyToOne
+    @JoinColumn(name="DEPARTMENT_ID")
+    Departement departement;
+    @Column(name="NB_INHABITANTS",nullable = false)
     private int nbHabitants;
 
     public Ville() {}
 
     public Ville(String nom, int nbHabitants) {
-        this.nom = nom;
+        this.name = nom;
         this.nbHabitants = nbHabitants;
     }
 
@@ -32,11 +35,11 @@ public class Ville implements Serializable {
     }
 
     public String getNom() {
-        return nom;
+        return name;
     }
 
     public void setNom(String nom) {
-        this.nom = nom;
+        this.name = nom;
     }
 
     public int getNbHabitants() {
@@ -51,7 +54,7 @@ public class Ville implements Serializable {
     public String toString() {
         final StringBuffer sb = new StringBuffer("Ville{");
         sb.append("id=").append(id);
-        sb.append(", nom='").append(nom).append('\'');
+        sb.append(", nom='").append(name).append('\'');
         sb.append(", nbHabitants=").append(nbHabitants);
         sb.append('}');
         return sb.toString();
