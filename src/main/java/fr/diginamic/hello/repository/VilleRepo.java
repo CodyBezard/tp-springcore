@@ -38,4 +38,5 @@ public interface VilleRepo extends JpaRepository<Ville, Integer> {
     //@Query("select v from Ville v join v.departement d where d.code = :codeDep order by v.nbHabitants DESC ")
     Page<Ville> findByDepartementCodeOrderByNbHabitantsDesc ( String depCode, Pageable pageable);
 
+    boolean existsByName(String name);
 }

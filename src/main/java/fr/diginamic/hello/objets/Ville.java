@@ -33,12 +33,12 @@ public class Ville implements Serializable {
         this.id = id;
     }
 
-    public String getNom() {
+    public String getName() {
         return name;
     }
 
-    public void setNom(String nom) {
-        this.name = nom;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getNbHabitants() {

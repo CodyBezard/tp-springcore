@@ -1,5 +1,6 @@
 package fr.diginamic.hello.objets;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

@@ -1,5 +1,9 @@
 package fr.diginamic.hello.controleurs;
 
+import fr.diginamic.hello.exception.FunctionalException;
+import fr.diginamic.hello.exception.VilleNotFound;
+import fr.diginamic.hello.mvc.VilleDto;
+import fr.diginamic.hello.mvc.VilleMapper;
 import fr.diginamic.hello.objets.Ville;
 import fr.diginamic.hello.services.VilleService;
 
@@ -12,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
@@ -23,17 +28,22 @@ public class VilleControleur {
 
     // Get - liste des villes
     @GetMapping
-    public Page<Ville> getAllVilles(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
+    public List<VilleDto> getAllVilles(@RequestParam(defaultValue = "0") int page,@RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return villeService.getAllVilles(pageable);
+        Page<Ville> v = villeService.getAllVilles(pageable);
+        if(v!=null){
+            List<VilleDto> vDto = VilleMapper.toDto(v);
+            return vDto;
+        }else return null;
     }
 
     //Get - ville par id
     @GetMapping("/{id}")
-    public ResponseEntity<Ville> getVilleById(@PathVariable Integer id) {
+    public ResponseEntity<VilleDto> getVilleById(@PathVariable Integer id) {
         Ville v = villeService.findVilleById(id);
         if(v!=null){
-            return ResponseEntity.ok(v);
+            VilleDto vDto = VilleMapper.toDto(v);
+            return ResponseEntity.ok(vDto);
         }else{
             return ResponseEntity.notFound().build();
         }
@@ -41,10 +51,11 @@ public class VilleControleur {
 
     //Get - ville par nom
     @GetMapping("/name/{name}")
-    public ResponseEntity<Ville> getVilleByName(@PathVariable String name) {
+    public ResponseEntity<VilleDto> getVilleByName(@PathVariable String name) {
         Ville v = villeService.findVilleByName(name);
         if(v!=null){
-            return ResponseEntity.ok(v);
+            VilleDto vDto = VilleMapper.toDto(v);
+            return ResponseEntity.ok(vDto);
         }else{
             return ResponseEntity.notFound().build();
         }
@@ -89,15 +100,17 @@ public class VilleControleur {
 
     //Post - Ajouter une nouvelle ville
     @PostMapping
-    public Iterable<Ville> addVille(@RequestBody Ville ville) {
-        return villeService.insertVille(ville);
+    public Iterable<Ville> addVille(@RequestBody VilleDto ville) throws FunctionalException {
+        Ville v = VilleMapper.toBean(ville);
+        return villeService.insertVille(v);
     }
 
     //Put - Modifier une ville existante
-    @PutMapping("/{id}")
-    public ResponseEntity<Iterable<Ville>> updateVille(@PathVariable Integer id, @RequestBody Ville ville) {
-        Iterable<Ville> updateVille = villeService.updateVille(id, ville);
-        return ResponseEntity.ok(updateVille);
+    @PutMapping
+    public ResponseEntity<VilleDto> updateVille(@RequestBody VilleDto ville) throws VilleNotFound {
+        Ville v = VilleMapper.toBean(ville);
+        Ville updateVille = villeService.updateVille(v);
+        return ResponseEntity.ok(VilleMapper.toDto(updateVille));
     }
 
     //Delete - Suppression d'une ville par ID

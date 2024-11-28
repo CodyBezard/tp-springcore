@@ -43,8 +43,12 @@ public class DepartmentService {
      * @param code le code du département
      * @return le département correspondant ou null si il n'existe pas
      */
-    public Departement findDepByCode(String code) {
-        return departmentRepo.findByCode(code);
+    public Optional<Departement> findDepByCode(String code) {
+        if(departmentRepo.findByCode(code).isPresent()){
+            return Optional.of(departmentRepo.findByCode(code).get());
+        }else{
+            return null;
+        }
     }
 
 

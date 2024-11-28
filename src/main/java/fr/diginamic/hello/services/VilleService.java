@@ -1,7 +1,12 @@
 package fr.diginamic.hello.services;
 
+import fr.diginamic.hello.exception.FunctionalException;
+import fr.diginamic.hello.exception.VilleNotFound;
+import fr.diginamic.hello.objets.Departement;
 import fr.diginamic.hello.objets.Ville;
+import fr.diginamic.hello.repository.DepartmentRepo;
 import fr.diginamic.hello.repository.VilleRepo;
+import jakarta.persistence.Id;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +21,8 @@ public class VilleService {
 
     @Autowired
     private VilleRepo villeRepo;
+    @Autowired
+    private DepartmentRepo departmentRepo;
 
 
     /**
@@ -112,6 +119,18 @@ public class VilleService {
         return villeRepo.findByDepartementCodeOrderByNbHabitantsDesc(code, pageable);
     }
 
+    private void validateVille(Ville ville) throws FunctionalException {
+        if(ville.getNbHabitants()<10){
+            throw new FunctionalException("La ville doit avoir au moins 10 habitants");
+        } else if(ville.getName().length()<2){
+            throw new FunctionalException("La Ville doit avoir un nom contenant au moins 2 lettres");
+        } else if(ville.getDepartementCode().length()<2){
+            throw new FunctionalException("Le code département doit au moins contenir 2 caractères");
+        }
+    }
+
+
+
     /**
      * Insert une ville
      *
@@ -119,25 +138,36 @@ public class VilleService {
      * @return la liste des villes après insertion
      */
     public Iterable<Ville> insertVille(Ville ville) {
+        validateVille(ville);
+        boolean exists = villeRepo.existsByName(ville.getName());
+        if(exists){
+            throw new FunctionalException("Le nom de la ville existe déjà en base");
+        }
+        Optional<Departement> d = departmentRepo.findByCode(ville.getDepartement().getCode());
+        if(d.isPresent()){
+            ville.setDepartement(d.get());
+        }else{
+            departmentRepo.save(ville.getDepartement());
+        }
         villeRepo.save(ville);
         return villeRepo.findAll();
     }
 
     /**
      * Update une ville existante
-     * @param id id de la ville à modifier
      * @param ville objet de type ville
      * @return la liste des villes après mise à jour
      */
-    public Iterable<Ville> updateVille(int id,Ville ville) {
-        Optional<Ville> v=villeRepo.findById(id);
+    public Ville updateVille(Ville ville) throws VilleNotFound {
+        validateVille(ville);
+        Optional<Ville> v=villeRepo.findById(ville.getId());
         if(v.isPresent()){
-            ville.setId(id); //Maintenir l'ID existant de la ville
+            ville.setDepartement(v.get().getDepartement());
             villeRepo.save(ville);
         }else{
-            return null;
+            throw new VilleNotFound("La ville n'est pas dans la base " + ville.getId());
         }
-        return villeRepo.findAll();
+        return ville;
     }
 
     /**
@@ -149,5 +179,4 @@ public class VilleService {
         villeRepo.deleteById(id);
         return villeRepo.findAll();
     }
-
 }

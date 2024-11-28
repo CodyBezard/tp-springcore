@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/departement")
 public class DepartmentControleur {
@@ -33,13 +35,8 @@ public class DepartmentControleur {
 
     //Get - departement par code
     @GetMapping("/code/{code}")
-    public ResponseEntity<Departement> getDepByName(@PathVariable String code) {
-        Departement d = departmentService.findDepByCode(code);
-        if(d!=null){
-            return ResponseEntity.ok(d);
-        }else{
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Optional<Departement>> getDepByName(@PathVariable String code) {
+        return ResponseEntity.ok(departmentService.findDepByCode(code));
     }
 
     //Post - Ajouter un nouveau departement
