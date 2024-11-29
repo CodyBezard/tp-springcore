@@ -1,5 +1,8 @@
 package fr.diginamic.hello.controleurs;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfWriter;
 import fr.diginamic.hello.exception.FunctionalException;
 import fr.diginamic.hello.exception.VilleNotFound;
 import fr.diginamic.hello.mvc.VilleDto;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,8 +24,8 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -133,6 +137,41 @@ public class VilleControleur {
     public ResponseEntity<Iterable<Ville>> deleteVilleById(@PathVariable Integer id) {
         Iterable<Ville> deleteVille = villeService.deleteVille(id);
         return ResponseEntity.ok(deleteVille);
+    }
+
+    @Operation(summary = "Impression d'un PDF pour une ville")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Retourne la ville en format PDF avec le nom \"Content-Disposition\", \"attachment; filename=\\\"fichier.pdf\\\"\" + nom",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = VilleDto.class)) }),
+            @ApiResponse(responseCode = "400", description = "Si une règle métier n'est pas respectée.",
+                    content = @Content)})
+    @GetMapping("/{name}/fiche")
+    public void ficheVilles(@PathVariable String name, HttpServletResponse resp) throws IOException, DocumentException, Exception, RuntimeException {
+
+        resp.setHeader("Content-Disposition", "attachment; filename=\"fichier.pdf\"" + name);
+
+        Ville v = villeService.findVilleByName(name);
+        if(v!=null){
+        //Création du document PDF et le writer avec iText
+        Document document = new Document(PageSize.A4);
+        PdfWriter.getInstance(document, resp.getOutputStream());
+
+        //Etape de création
+        document.open();
+        document.addTitle("Fiche");
+        document.newPage();
+        BaseFont baseFont = BaseFont.createFont(BaseFont.HELVETICA,BaseFont.WINANSI,BaseFont.EMBEDDED);
+        Phrase p1=new Phrase("Coucou" + "\n", new Font(baseFont, 32.0f,1,new BaseColor(0,51,80)));
+        document.add(p1);
+        document.add(new Phrase("Ville de " + v.getName() + " avec " + v.getNbHabitants() + " habitants" +"\n", new Font(baseFont, 12.0f,1, BaseColor.BLACK)));
+        document.close();
+
+        //On pousse les données
+        resp.flushBuffer();
+
+        }
     }
 
 }
