@@ -7,6 +7,11 @@ import fr.diginamic.hello.mvc.VilleMapper;
 import fr.diginamic.hello.objets.Ville;
 import fr.diginamic.hello.services.VilleService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -98,11 +104,20 @@ public class VilleControleur {
         return villeService.findVilleByDep(code,n);
     }
 
+
     //Post - Ajouter une nouvelle ville
+    @Operation(summary = "Création d'une nouvelle ville")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Retourne la liste des villes incluant la dernière ville créée",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = VilleDto.class)) }),
+            @ApiResponse(responseCode = "400", description = "Si une règle métier n'est pas respectée.",
+                    content = @Content)})
     @PostMapping
-    public Iterable<Ville> addVille(@RequestBody VilleDto ville) throws FunctionalException {
+    public List<VilleDto> addVille(@RequestBody VilleDto ville) throws FunctionalException {
         Ville v = VilleMapper.toBean(ville);
-        return villeService.insertVille(v);
+        return villeService.insertVille(v).stream().map(VilleMapper::toDto).collect(Collectors.toList());
     }
 
     //Put - Modifier une ville existante

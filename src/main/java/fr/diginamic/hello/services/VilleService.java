@@ -137,7 +137,7 @@ public class VilleService {
      * @param ville objet de type Ville
      * @return la liste des villes après insertion
      */
-    public Iterable<Ville> insertVille(Ville ville) {
+    public List<Ville> insertVille(Ville ville) {
         validateVille(ville);
         boolean exists = villeRepo.existsByName(ville.getName());
         if(exists){
